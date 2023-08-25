@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
 
     @NotNull(message = "Username Can't Be Null")

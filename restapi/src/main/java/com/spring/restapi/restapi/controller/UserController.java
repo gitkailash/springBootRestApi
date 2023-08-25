@@ -1,8 +1,6 @@
 package com.spring.restapi.restapi.controller;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.spring.restapi.restapi.response.ResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +20,6 @@ import com.spring.restapi.restapi.service.UserService;
 
 import jakarta.validation.Valid;
 
-// import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -37,26 +34,34 @@ public class UserController {
         return "Welcome To Rest API";
     }
 
-    @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUser() {
-        return ResponseEntity.ok(this.userService.getAllUser());
+    @GetMapping({"/users", "/users/"})
+    public ResponseEntity getAllUser() {
+        try {
+            return ResponseHandler.responseHandler("All User returned", HttpStatus.OK, this.userService.getAllUser());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<User> getUser(@PathVariable int userId) throws UserNotFoundException {
-        Optional<User> user = userService.getSingleUser(userId);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<Object> getUser(@PathVariable int userId) {
+        try {
+            return ResponseHandler.responseHandler("User fetched for id:: "+userId, HttpStatus.OK, this.userService.getUserById(userId));
+        } catch (UserNotFoundException e) {
+            String errorMessage = "user not found for given id :: " + userId;
+            e.printStackTrace();
+            return ResponseHandler.responseHandler(errorMessage, HttpStatus.NOT_FOUND, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.of(user);
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> addUser(@Valid @RequestBody User user) {
-        User u = null;
+    public ResponseEntity<Object> addUser(@Valid @RequestBody User user) {
         try {
-            u = this.userService.addUser(user);
-            return ResponseEntity.of(Optional.of(u));
+            return ResponseHandler.responseHandler("User Added", HttpStatus.CREATED, userService.addUser(user));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -65,9 +70,9 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public ResponseEntity<User> updateUser(@Valid @RequestBody User user) {
+    public ResponseEntity<Object> updateUser(@Valid @RequestBody User user) {
         try {
-            return ResponseEntity.ok(this.userService.updateUser(user));
+            return ResponseHandler.responseHandler("User update Successful", HttpStatus.OK, this.userService.updateUser(user));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -75,12 +80,12 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{userId}")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable int userId) {
+    public ResponseEntity deleteUser(@PathVariable int userId) {
         try {
             this.userService.deleterUser(userId);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body("User deleted");
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
