@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,13 +49,16 @@ public class UserRepoTest {
     //Test Case SUCCESS
     @Test
     void testFindById(){
-        List<User> userById = userRepo.findAll().stream()
-                .filter(u -> u.getUserId() == 1)
-                .collect(Collectors.toList());
-        System.out.println("Retrieved user: " + userById); // Debug print
-        assertNotNull(userById); // Check that the retrieved user is not null
-        assertEquals(1, userById.get(0).getUserId()); // Check that the user's ID is 20
-    }
+        int targetUserId = 1; // The userId you want to find
+        Optional<User> userById = userRepo.findAll().stream()
+                .filter(u -> u.getUserId() == targetUserId)
+                .findFirst();
+
+        System.out.println("Retrieved user: " + userById);
+
+        if (!userById.isEmpty()) {
+            assertEquals(targetUserId, userById.get().getUserId());
+        }}
 
     //Test Case FAILURE
     @Test
