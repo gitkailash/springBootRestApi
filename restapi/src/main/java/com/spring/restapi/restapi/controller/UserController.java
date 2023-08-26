@@ -46,10 +46,16 @@ public class UserController {
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<Object> getUser(@PathVariable int userId) {
+        String errorMessage = "user not found for given id :: " + userId;
+        String message = "User fetched for id:: " + userId;
         try {
-            return ResponseHandler.responseHandler("User fetched for id:: "+userId, HttpStatus.OK, this.userService.getUserById(userId));
+            User user = this.userService.getUserById(userId);
+            if (user != null) {
+                return ResponseHandler.responseHandler(message, HttpStatus.OK, user);
+            } else {
+                return ResponseHandler.responseHandler(errorMessage, HttpStatus.NOT_FOUND, null);
+            }
         } catch (UserNotFoundException e) {
-            String errorMessage = "user not found for given id :: " + userId;
             e.printStackTrace();
             return ResponseHandler.responseHandler(errorMessage, HttpStatus.NOT_FOUND, null);
         } catch (Exception e) {
