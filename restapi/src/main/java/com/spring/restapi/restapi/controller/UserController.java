@@ -1,7 +1,9 @@
 package com.spring.restapi.restapi.controller;
 
+import com.spring.restapi.restapi.dto.UserDto;
 import com.spring.restapi.restapi.response.ResponseHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.spring.restapi.restapi.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,19 +16,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.spring.restapi.restapi.entities.User;
 import com.spring.restapi.restapi.exception.UserNotFoundException;
-import com.spring.restapi.restapi.service.UserService;
 
 import jakarta.validation.Valid;
 
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class UserController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
     @GetMapping("/")
     @ResponseBody
@@ -49,7 +49,7 @@ public class UserController {
         String errorMessage = "user not found for given id :: " + userId;
         String message = "User fetched for id:: " + userId;
         try {
-            User user = this.userService.getUserById(userId);
+            UserDto user = this.userService.getUserById(userId);
             if (user != null) {
                 return ResponseHandler.responseHandler(message, HttpStatus.OK, user);
             } else {
@@ -65,7 +65,7 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<Object> addUser(@Valid @RequestBody User user) {
+    public ResponseEntity<Object> addUser(@Valid @RequestBody UserDto user) {
         try {
             return ResponseHandler.responseHandler("User Added", HttpStatus.CREATED, userService.addUser(user));
         } catch (Exception e) {
@@ -76,7 +76,7 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public ResponseEntity<Object> updateUser(@Valid @RequestBody User user) {
+    public ResponseEntity<Object> updateUser(@Valid @RequestBody UserDto user) {
         try {
             return ResponseHandler.responseHandler("User update Successful", HttpStatus.OK, this.userService.updateUser(user));
         } catch (Exception e) {
@@ -88,7 +88,7 @@ public class UserController {
     @DeleteMapping("/users/{userId}")
     public ResponseEntity deleteUser(@PathVariable int userId) {
         try {
-            this.userService.deleterUser(userId);
+            this.userService.deleteUser(userId);
             return ResponseEntity.status(HttpStatus.OK).body("User deleted");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

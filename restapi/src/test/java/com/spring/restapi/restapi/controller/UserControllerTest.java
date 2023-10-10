@@ -1,8 +1,8 @@
 package com.spring.restapi.restapi.controller;
 
-import com.spring.restapi.restapi.entities.User;
+import com.spring.restapi.restapi.dto.UserDto;
 import com.spring.restapi.restapi.exception.UserNotFoundException;
-import com.spring.restapi.restapi.service.UserService;
+import com.spring.restapi.restapi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,17 +31,17 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
-    private UserService userService;
+    private UserServiceImpl userService;
     private AutoCloseable autoCloseable;
-    List<User> userList;
+    List<UserDto> userList;
 
     @BeforeEach
     void setUp() {
         autoCloseable = MockitoAnnotations.openMocks(this);
         userList = Arrays.asList(
-                new User(1, "Kailash", "kailash@gmail.com", "9816385003", "male", 26, "Nepali"),
-                new User(2, "Nikita", "niki@gmail.com", "9816850093", "female", 26, "Nepali"),
-                new User(3, "Omkar", "om@gmail.com", "9815585093", "male", 26, "Nepali")
+                new UserDto(1, "Kailash", "kailash@gmail.com", "9816385003", "male", 26, "Nepali"),
+                new UserDto(2, "Nikita", "niki@gmail.com", "9816850093", "female", 26, "Nepali"),
+                new UserDto(3, "Omkar", "om@gmail.com", "9815585093", "male", 26, "Nepali")
         );
 
     }
@@ -66,7 +66,7 @@ class UserControllerTest {
     @DisplayName("Get User By Id")
     void testGetUser() throws Exception {
         int userId = 1;
-        Optional<User> user = userList.stream().filter(u -> u.getUserId() == userId).findFirst();
+        Optional<UserDto> user = userList.stream().filter(u -> u.getUserId() == userId).findFirst();
         System.out.println(user);
         when(userService.getUserById(userId)).thenReturn(user.orElse(null));
 
@@ -88,7 +88,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Add User")
     void addUser() throws Exception {
-        User newUser = new User(6, "Nabin", "Nabin@gmail.com", "9818525093", "male", 26, "Nepali");
+        UserDto newUser = new UserDto(6, "Nabin", "Nabin@gmail.com", "9818525093", "male", 26, "Nepali");
         when(userService.addUser(newUser)).thenReturn(newUser);
 
         mockMvc.perform(post("/api/users")
@@ -102,7 +102,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Update User")
     void updateUser() throws Exception {
-        User updateUser = new User(1, "Nabin", "Nib@gmail.com", "9818525093", "male", 20, "Nepali");
+        UserDto updateUser = new UserDto(1, "Nabin", "Nib@gmail.com", "9818525093", "male", 20, "Nepali");
         when(userService.updateUser(updateUser)).thenReturn(updateUser);
 
         mockMvc.perform(put("/api/users")
@@ -121,6 +121,6 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("User deleted"));
 
-        verify(userService, times(1)).deleterUser(userId);
+        verify(userService, times(1)).deleteUser(userId);
     }
 }
