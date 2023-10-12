@@ -6,15 +6,8 @@ import com.spring.restapi.restapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import com.spring.restapi.restapi.exception.UserNotFoundException;
 
@@ -22,6 +15,7 @@ import jakarta.validation.Valid;
 
 
 @RestController
+@CrossOrigin("http://localhost:3000/")
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class UserController {
@@ -65,8 +59,11 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<Object> addUser(@Valid @RequestBody UserDto user) {
+    public ResponseEntity<Object> addUser(@Valid @RequestBody UserDto user, BindingResult bindingResult) {
         try {
+            if (bindingResult.hasErrors()) {
+                return ResponseHandler.responseHandler("Invalid Data",HttpStatus.BAD_REQUEST);
+            }
             return ResponseHandler.responseHandler("User Added", HttpStatus.CREATED, userService.addUser(user));
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,8 +73,11 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public ResponseEntity<Object> updateUser(@Valid @RequestBody UserDto user) {
+    public ResponseEntity<Object> updateUser(@Valid @RequestBody UserDto user, BindingResult bindingResult) {
         try {
+            if (bindingResult.hasErrors()) {
+                return ResponseHandler.responseHandler("Invalid Data",HttpStatus.BAD_REQUEST);
+            }
             return ResponseHandler.responseHandler("User update Successful", HttpStatus.OK, this.userService.updateUser(user));
         } catch (Exception e) {
             e.printStackTrace();
